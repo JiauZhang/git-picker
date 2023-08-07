@@ -1,4 +1,4 @@
-import gtipicker as gp
+import gitpicker as gp
 
 repo = 'https://github.com/JiauZhang/git-picker'
 files = {
