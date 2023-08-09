@@ -1,6 +1,8 @@
 import gitpicker as gp
 
-repo = 'https://github.com/JiauZhang/git-picker'
+user = 'JiauZhang'
+repo = 'git-picker'
+branch = 'main'
 files = {
     'dir': [
         'examples',
@@ -8,8 +10,9 @@ files = {
     ],
     'file': [
         'LICENSE',
-        "README.md",
+        'setup.py',
     ],
 }
 
-gp.pick(repo, files)
+picker = gp.Picker(user, repo, branch, files)
+picker.pick()
