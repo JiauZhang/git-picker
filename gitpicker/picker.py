@@ -24,14 +24,16 @@ class Picker():
         threads = [td.Thread(target=self.download_thread) for _ in range(self.threads)]
         _ = [thread.start() for thread in threads]
 
-        files = self.files['file']
-        self.lock.acquire()
-        for file in files:
-            self.tasks.put(file)
-        self.lock.release()
-        dirs = self.files['dir']
-        for dir in dirs:
-            self.download_dir(dir)
+        if 'file' in self.files:
+            files = self.files['file']
+            self.lock.acquire()
+            for file in files:
+                self.tasks.put(file)
+            self.lock.release()
+        if 'dir' in self.files:
+            dirs = self.files['dir']
+            for dir in dirs:
+                self.download_dir(dir)
 
         self.running = False
         _ = [thread.join() for thread in threads]
