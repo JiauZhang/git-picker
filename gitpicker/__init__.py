@@ -1,1 +1,1 @@
-from .picker import Picker
+from .github import GitHub

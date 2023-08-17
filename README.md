@@ -21,6 +21,6 @@ files = {
     ],
 }
 
-picker = gp.Picker(user, repo, branch, files)
+picker = gp.GitHub(user, repo, branch, files)
 picker.pick()
 ```
