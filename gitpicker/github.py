@@ -1,67 +1,27 @@
-import os, json, requests, time
-import os.path as osp
+import json, requests
 from .picker import Picker
 
 class GitHub(Picker):
     def __init__(self, user, repo, branch, files, **kwargs):
-        super().__init__(**kwargs)
-        self.user = user
-        self.repo = repo
-        self.branch = branch
-        self.files = files
+        super().__init__(user, repo, branch, files, **kwargs)
         self.base_url = f'https://github.com/{self.user}/{self.repo}/blob/{self.branch}'
 
-        if not osp.exists(self.repo):
-           os.makedirs(self.repo)
+    def make_url(self, path):
+        return f'{self.base_url}/{path}'
 
-    def download_file(self, file):
-        url = f'{self.base_url}/{file}'
-        print(f'downloading {url}')
-        retry = 0
-        while retry < self.retry:
-            try:
-                r = requests.get(url)
-                js = json.loads(r.text)
-                lines = js['payload']['blob']['rawLines']
-                break
-            except:
-                retry += 1
-                print(f'retry[{retry}/{self.retry}] failed!')
-                time.sleep(1)
+    def get_file_lines(self, url):
+        r = requests.get(url)
+        js = json.loads(r.text)
+        lines = js['payload']['blob']['rawLines']
+        return lines
 
-        if retry == self.retry:
-            raise RuntimeError('retry failed!')
+    def get_dir_items(self, url):
+        r = requests.get(url)
+        js = json.loads(r.text)
+        items = js['payload']['tree']['items']
+        return items
 
-        filename = f'{self.repo}/{file}'
-        self.save_file(filename, lines)
-
-    def save_file(self, filename, lines):
-        dirname = osp.dirname(filename)
-        if not osp.exists(dirname):
-            os.makedirs(dirname)
-        with open(filename, 'w') as f:
-            for i in range(len(lines)-1):
-                f.write(lines[i] + '\n')
-            f.write(lines[-1])
-
-    def download_dir(self, dir):
-        url = f'{self.base_url}/{dir}'
-        print(f'downloading {url}')
-        retry = 0
-        while retry < self.retry:
-            try:
-                r = requests.get(url)
-                js = json.loads(r.text)
-                items = js['payload']['tree']['items']
-                break
-            except:
-                retry += 1
-                print(f'retry[{retry}/{self.retry}] failed!')
-                time.sleep(1)
-
-        if retry == self.retry:
-            raise RuntimeError('retry failed!')
-
+    def parse_items(self, items):
         _dirs, _files = [], []
         for item in items:
             ctype = item['contentType']
@@ -71,10 +31,4 @@ class GitHub(Picker):
                 _files.append(item['path'])
             else:
                 raise RuntimeError(f'unsupport contentType: {ctype}')
-
-        self.lock.acquire()
-        for file in _files:
-            self.tasks.put(file)
-        self.lock.release()
-        for dir in _dirs:
-            self.download_dir(dir)
+        return _dirs, _files

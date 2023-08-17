@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'git-picker',
     packages = find_packages(exclude=['examples']),
-    version = '0.1.0',
+    version = '0.2.0',
     license='MIT',
     description = 'git picker',
     author = 'JiauZhang',
