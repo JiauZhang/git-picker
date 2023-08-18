@@ -42,7 +42,7 @@ class Picker(ABC):
         dirname = osp.dirname(filename)
         if not osp.exists(dirname):
             os.makedirs(dirname)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding='utf-8') as f:
             for i in range(len(lines)-1):
                 f.write(lines[i] + '\n')
             f.write(lines[-1])
