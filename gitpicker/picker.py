@@ -60,7 +60,7 @@ class Picker(ABC):
                 time.sleep(1)
 
     @abstractmethod
-    def make_url(self, path):
+    def make_url(self, file, file_type):
         ...
 
     @abstractmethod
@@ -72,7 +72,7 @@ class Picker(ABC):
         ...
 
     def download_file(self, file):
-        url = self.make_url(file)
+        url = self.make_url(file, 'file')
         print(f'downloading {url}')
         retry = 0
         while retry < self.retry:
@@ -95,7 +95,7 @@ class Picker(ABC):
         ...
 
     def download_dir(self, dir):
-        url = self.make_url(dir)
+        url = self.make_url(dir, 'dir')
         print(f'downloading {url}')
         retry = 0
         while retry < self.retry:

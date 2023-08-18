@@ -6,7 +6,7 @@ class GitHub(Picker):
         super().__init__(user, repo, branch, files, **kwargs)
         self.base_url = f'https://github.com/{self.user}/{self.repo}/blob/{self.branch}'
 
-    def make_url(self, path):
+    def make_url(self, path, file_type):
         return f'{self.base_url}/{path}'
 
     def get_file_lines(self, url):
