@@ -25,10 +25,11 @@ class GitHub(Picker):
         _dirs, _files = [], []
         for item in items:
             ctype = item['contentType']
+            path = item['path']
             if ctype == 'directory':
-                _dirs.append(item['path'])
+                _dirs.append(path)
             elif ctype == 'file':
-                _files.append(item['path'])
+                _files.append(path)
             else:
                 raise RuntimeError(f'unsupport contentType: {ctype}')
         return _dirs, _files
