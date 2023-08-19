@@ -10,19 +10,13 @@ class Gitee(Picker):
         from lxml import etree
         self.to_html = etree.HTML
 
-    def make_url(self, path, file_type):
-        if file_type == 'file':
-            return f'{self.base_url}/{path}'
-        elif file_type == 'dir':
-            return f'{self.web_url}/{path}'
-        else:
-            raise RuntimeError(f'Unsupported file_type: {file_type}')
-
-    def get_file_lines(self, url):
+    def get_file_lines(self, file):
+        url = f'{self.base_url}/{file}'
         r = requests.get(url)
         return [r.text]
 
-    def get_dir_items(self, url):
+    def get_dir_items(self, dir):
+        url = f'{self.web_url}/{dir}'
         r = requests.get(url)
         html = self.to_html(r.text.encode('utf-8'))
         dir_tree = html.xpath('//div[@id="tree-slider"]')[0]

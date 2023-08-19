@@ -6,16 +6,15 @@ class GitHub(Picker):
         super().__init__(user, repo, branch, files, **kwargs)
         self.base_url = f'https://github.com/{self.user}/{self.repo}/blob/{self.branch}'
 
-    def make_url(self, path, file_type):
-        return f'{self.base_url}/{path}'
-
-    def get_file_lines(self, url):
+    def get_file_lines(self, file):
+        url = f'{self.base_url}/{file}'
         r = requests.get(url)
         js = json.loads(r.text)
         lines = js['payload']['blob']['rawLines']
         return lines
 
-    def get_dir_items(self, url):
+    def get_dir_items(self, dir):
+        url = f'{self.base_url}/{dir}'
         r = requests.get(url)
         js = json.loads(r.text)
         items = js['payload']['tree']['items']

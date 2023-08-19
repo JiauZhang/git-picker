@@ -60,10 +60,6 @@ class Picker(ABC):
                 time.sleep(1)
 
     @abstractmethod
-    def make_url(self, file, file_type):
-        ...
-
-    @abstractmethod
     def get_file_lines(self, url):
         ...
 
@@ -72,12 +68,11 @@ class Picker(ABC):
         ...
 
     def download_file(self, file):
-        url = self.make_url(file, 'file')
-        print(f'downloading {url}')
+        print(f'downloading {self.repo}/{file}')
         retry = 0
         while retry < self.retry:
             try:
-                lines = self.get_file_lines(url)
+                lines = self.get_file_lines(file)
                 break
             except:
                 retry += 1
@@ -95,12 +90,11 @@ class Picker(ABC):
         ...
 
     def download_dir(self, dir):
-        url = self.make_url(dir, 'dir')
-        print(f'downloading {url}')
+        print(f'downloading {self.repo}/{dir}')
         retry = 0
         while retry < self.retry:
             try:
-                items = self.get_dir_items(url)
+                items = self.get_dir_items(dir)
                 break
             except:
                 retry += 1
