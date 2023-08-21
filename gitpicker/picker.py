@@ -19,19 +19,28 @@ class Picker(ABC):
         if not osp.exists(self.repo):
            os.makedirs(self.repo)
 
+    @staticmethod
+    def check_arg(str_or_list):
+        if isinstance(str_or_list, list):
+            return str_or_list
+        elif isinstance(str_or_list, str):
+            return [str_or_list]
+        else:
+            raise RuntimeError('only support str or list!')
+
     def pick(self):
         self.running = True
         threads = [td.Thread(target=self.download_thread) for _ in range(self.threads)]
         _ = [thread.start() for thread in threads]
 
         if 'file' in self.files:
-            files = self.files['file']
+            files = self.check_arg(self.files['file'])
             self.lock.acquire()
             for file in files:
                 self.tasks.put(file)
             self.lock.release()
         if 'dir' in self.files:
-            dirs = self.files['dir']
+            dirs = self.check_arg(self.files['dir'])
             for dir in dirs:
                 self.download_dir(dir)
 
