@@ -7,7 +7,7 @@ class GitHub(Picker):
         self.base_url = f'https://github.com/{self.user}/{self.repo}/blob/{self.branch}'
 
     def get_file_lines(self, file):
-        url = f'{self.base_url}/{file}'
+        url = f'{self.base_url}/{file}?plain=1'
         r = requests.get(url)
         js = json.loads(r.text)
         lines = js['payload']['blob']['rawLines']
