@@ -15,9 +15,23 @@ class Picker(ABC):
         self.lock = td.Lock()
         self.threads = threads
         self.running = False
+        self.non_txt_suffixes = set([
+            'png', 'jpg', 
+        ])
 
         if not osp.exists(self.repo):
            os.makedirs(self.repo)
+
+    @staticmethod
+    def suffix(file):
+        basename = osp.basename(file)
+        i = basename.rfind('.')
+        if i == -1: return ''
+        return basename[i+1:]
+
+    def skip(self, file):
+        suffix = self.suffix(file)
+        return suffix in self.non_txt_suffixes
 
     @staticmethod
     def check_arg(str_or_list):
@@ -77,7 +91,11 @@ class Picker(ABC):
         ...
 
     def download_file(self, file):
-        print(f'downloading {self.repo}/{file}')
+        if not self.skip(file): 
+            print(f'downloading {self.repo}/{file}')
+        else:
+            print(f'skip to download non text file: {self.repo}/{file}')
+            return
         retry = 0
         while retry < self.retry:
             try:

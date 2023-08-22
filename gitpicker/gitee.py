@@ -6,7 +6,6 @@ class Gitee(Picker):
         super().__init__(user, repo, branch, files, **kwargs)
         self.base_url = f'https://gitee.com/{self.user}/{self.repo}/raw/{self.branch}'
         self.web_url = f'https://gitee.com//{self.user}/{self.repo}/tree/{self.branch}'
-        self.dir_tree = {'tree': {}, 'sha': self.branch}
         from lxml import etree
         self.to_html = etree.HTML
 
