@@ -19,8 +19,7 @@ class Picker(ABC):
             'png', 'jpg', 
         ])
 
-        if not osp.exists(self.repo):
-           os.makedirs(self.repo)
+        os.makedirs(self.repo, exist_ok=True)
 
     @staticmethod
     def suffix(file):
@@ -62,9 +61,6 @@ class Picker(ABC):
         _ = [thread.join() for thread in threads]
 
     def save_file(self, filename, lines):
-        dirname = osp.dirname(filename)
-        if not osp.exists(dirname):
-            os.makedirs(dirname)
         with open(filename, 'w', encoding='utf-8') as f:
             for i in range(len(lines)-1):
                 f.write(lines[i] + '\n')
@@ -138,4 +134,5 @@ class Picker(ABC):
             self.tasks.put(file)
         self.lock.release()
         for dir in _dirs:
+            os.makedirs(dir, exist_ok=True)
             self.download_dir(dir)
