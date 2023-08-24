@@ -20,6 +20,13 @@ class Picker(ABC):
         ])
 
         os.makedirs(self.repo, exist_ok=True)
+        if 'file' in self.files:
+            dirnames = set()
+            for file in self.files['file']:
+                filename = f'{self.repo}/{file}'
+                dirnames.add(osp.dirname(filename))
+            for dirname in dirnames:
+                os.makedirs(dirname, exist_ok=True)
 
     @staticmethod
     def suffix(file):
@@ -114,6 +121,7 @@ class Picker(ABC):
 
     def download_dir(self, dir):
         print(f'downloading {self.repo}/{dir}')
+        os.makedirs(f'{self.repo}/{dir}', exist_ok=True)
         retry = 0
         while retry < self.retry:
             try:
@@ -134,5 +142,4 @@ class Picker(ABC):
             self.tasks.put(file)
         self.lock.release()
         for dir in _dirs:
-            os.makedirs(dir, exist_ok=True)
             self.download_dir(dir)
