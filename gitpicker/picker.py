@@ -15,6 +15,7 @@ class Picker(ABC):
         self.lock = td.Lock()
         self.threads = threads
         self.running = False
+        self.failed = False
         self.non_txt_suffixes = set([
             'png', 'jpg', 
         ])
@@ -74,7 +75,9 @@ class Picker(ABC):
             f.write(lines[-1])
 
     def download_thread(self):
-        while (self.running or not self.tasks.empty()):
+        while self.running or not self.tasks.empty():
+            if self.failed:
+                return
             if not self.tasks.empty():
                 self.lock.acquire()
                 task = None
@@ -99,18 +102,19 @@ class Picker(ABC):
         else:
             print(f'skip to download non text file: {self.repo}/{file}')
             return
-        retry = 0
-        while retry < self.retry:
+        retry, lines = 0, None
+        while not self.failed and retry < self.retry:
             try:
                 lines = self.get_file_lines(file)
                 break
             except:
                 retry += 1
-                print(f'retry[{retry}/{self.retry}] failed!')
+                print(f'retry[{retry}/{self.retry}] {self.repo}/{file} failed!')
                 time.sleep(1)
 
-        if retry == self.retry:
-            raise RuntimeError('retry failed!')
+        if lines is None or retry == self.retry:
+            self.failed = True
+            raise RuntimeError(f'retry[{retry}/{self.retry}] downloading {self.repo}/{file} failed!')
 
         filename = f'{self.repo}/{file}'
         self.save_file(filename, lines)
@@ -122,18 +126,19 @@ class Picker(ABC):
     def download_dir(self, dir):
         print(f'downloading {self.repo}/{dir}')
         os.makedirs(f'{self.repo}/{dir}', exist_ok=True)
-        retry = 0
-        while retry < self.retry:
+        retry, items = 0, None
+        while not self.failed and retry < self.retry:
             try:
                 items = self.get_dir_items(dir)
                 break
             except:
                 retry += 1
-                print(f'retry[{retry}/{self.retry}] failed!')
+                print(f'retry[{retry}/{self.retry}] {self.repo}/{dir} failed!')
                 time.sleep(1)
 
-        if retry == self.retry:
-            raise RuntimeError('retry failed!')
+        if items is None or retry == self.retry:
+            self.failed = True
+            raise RuntimeError(f'retry[{retry}/{self.retry}] downloading {self.repo}/{dir} failed!')
 
         _dirs, _files = self.parse_items(items)
 
