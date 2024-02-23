@@ -1,4 +1,3 @@
-import requests
 from .picker import Picker
 
 class GitHub(Picker):
@@ -8,14 +7,14 @@ class GitHub(Picker):
 
     def get_file_lines(self, file):
         url = f'{self.base_url}/{file}?plain=1'
-        r = requests.get(url)
+        r = self.client.get(url, follow_redirects=True)
         js = r.json()
         lines = js['payload']['blob']['rawLines']
         return lines
 
     def get_dir_items(self, dir):
         url = f'{self.base_url}/{dir}'
-        r = requests.get(url)
+        r = self.client.get(url, follow_redirects=True)
         js = r.json()
         items = js['payload']['tree']['items']
         return items

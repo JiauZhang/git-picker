@@ -1,4 +1,4 @@
-import os, time
+import os, time, httpx, traceback
 import os.path as osp
 import threading as td
 from queue import Queue
@@ -19,6 +19,7 @@ class Picker(ABC):
         self.non_txt_suffixes = set([
             'png', 'jpg', 
         ])
+        self.client = httpx.Client()
 
         os.makedirs(self.repo, exist_ok=True)
         if 'file' in self.files:
@@ -134,6 +135,7 @@ class Picker(ABC):
             except:
                 retry += 1
                 print(f'retry[{retry}/{self.retry}] {self.repo}/{dir} failed!')
+                traceback.print_exc()
                 time.sleep(1)
 
         if items is None or retry == self.retry:

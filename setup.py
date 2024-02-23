@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'git-picker',
     packages = find_packages(exclude=['examples']),
-    version = '0.3.7',
+    version = '0.3.8',
     license='MIT',
     description = 'git picker',
     author = 'JiauZhang',
@@ -15,7 +15,7 @@ setup(
         'GitHub',
     ],
     install_requires=[
-        'requests',
+        'httpx',
     ],
     classifiers=[
         'Intended Audience :: Developers',

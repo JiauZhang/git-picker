@@ -1,4 +1,3 @@
-import requests
 from .picker import Picker
 
 class Gitee(Picker):
@@ -11,12 +10,12 @@ class Gitee(Picker):
 
     def get_file_lines(self, file):
         url = f'{self.base_url}/{file}'
-        r = requests.get(url)
+        r = self.client.get(url, follow_redirects=True)
         return [r.text]
 
     def get_dir_items(self, dir):
         url = f'{self.web_url}/{dir}'
-        r = requests.get(url)
+        r = self.client.get(url, follow_redirects=True)
         html = self.to_html(r.text.encode('utf-8'))
         dir_tree = html.xpath('//div[@id="tree-slider"]')[0]
         _dirs = dir_tree.xpath('./div[@data-type="folder"]')
