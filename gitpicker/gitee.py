@@ -25,7 +25,3 @@ class Gitee(Picker):
         for i in range(len(_files)):
             _files[i] = _files[i].xpath('./div[@data-type="file"]')[0].attrib['data-path']
         return _dirs, _files
-
-    def parse_items(self, items):
-        _dirs, _files = items
-        return _dirs, _files

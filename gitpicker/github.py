@@ -17,7 +17,7 @@ class GitHub(Picker):
         r = self.client.get(url, follow_redirects=True)
         js = r.json()
         items = js['payload']['tree']['items']
-        return items
+        return self.parse_items(items)
 
     def parse_items(self, items):
         _dirs, _files = [], []

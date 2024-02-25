@@ -120,10 +120,6 @@ class Picker(ABC):
         filename = f'{self.repo}/{file}'
         self.save_file(filename, lines)
 
-    @abstractmethod
-    def parse_items(self, items):
-        ...
-
     def download_dir(self, dir):
         print(f'downloading {self.repo}/{dir}')
         os.makedirs(f'{self.repo}/{dir}', exist_ok=True)
@@ -142,7 +138,7 @@ class Picker(ABC):
             self.failed = True
             raise RuntimeError(f'retry[{retry}/{self.retry}] downloading {self.repo}/{dir} failed!')
 
-        _dirs, _files = self.parse_items(items)
+        _dirs, _files = items
 
         self.lock.acquire()
         for file in _files:
