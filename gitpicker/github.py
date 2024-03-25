@@ -1,4 +1,5 @@
 from .picker import Picker
+from conippets import git
 
 class GitHub(Picker):
     def __init__(self, user, repo, branch, files, **kwargs):
@@ -6,17 +7,13 @@ class GitHub(Picker):
         self.base_url = f'https://github.com/{self.user}/{self.repo}/blob/{self.branch}'
 
     def get_file_lines(self, file):
-        url = f'{self.base_url}/{file}?plain=1'
-        r = self.client.get(url, follow_redirects=True)
-        js = r.json()
-        lines = js['payload']['blob']['rawLines']
+        url = f'{self.base_url}/{file}'
+        lines = git.rawLines(url)
         return lines
 
     def get_dir_items(self, dir):
         url = f'{self.base_url}/{dir}'
-        r = self.client.get(url, follow_redirects=True)
-        js = r.json()
-        items = js['payload']['tree']['items']
+        items = git.list_dir(url)
         return self.parse_items(items)
 
     def parse_items(self, items):

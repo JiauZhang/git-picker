@@ -5,7 +5,10 @@ from queue import Queue
 from abc import ABC, abstractmethod
 
 class Picker(ABC):
-    def __init__(self, user, repo, branch, files, retry=10, threads=os.cpu_count()):
+    def __init__(
+        self, user, repo, branch, files, retry=10, threads=os.cpu_count(),
+        proxy=None,
+    ):
         self.user = user
         self.repo = repo
         self.branch = branch
@@ -19,7 +22,7 @@ class Picker(ABC):
         self.non_txt_suffixes = set([
             'png', 'jpg', 
         ])
-        self.client = httpx.Client()
+        self.client = httpx.Client(proxy=proxy)
 
         os.makedirs(self.repo, exist_ok=True)
         if 'file' in self.files:
