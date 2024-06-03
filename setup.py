@@ -16,7 +16,7 @@ setup(
     ],
     install_requires=[
         'httpx',
-        'conippets["git"]==0.1.0',
+        'conippets[git]==0.1.0',
     ],
     classifiers=[
         'Intended Audience :: Developers',
