@@ -1,22 +1,23 @@
 from setuptools import setup, find_packages
+from gitpicker import __version__
 
 setup(
-    name = 'git-picker',
-    packages = find_packages(exclude=['examples']),
-    version = '0.3.11',
+    name='git-picker',
+    packages=find_packages(exclude=['examples']),
+    version=__version__,
     license='MIT',
-    description = 'git picker',
-    author = 'JiauZhang',
-    author_email = 'jiauzhang@163.com',
-    url = 'https://github.com/JiauZhang/git-picker',
+    description='git picker',
+    author='JiauZhang',
+    author_email='jiauzhang@163.com',
+    url='https://github.com/JiauZhang/git-picker',
     long_description=open("README.md", "r", encoding="utf-8").read(),
-    long_description_content_type = 'text/markdown',
-    keywords = [
+    long_description_content_type='text/markdown',
+    keywords=[
         'GitHub',
     ],
     install_requires=[
-        'httpx',
-        'conippets[git]==0.1.0',
+        'httpx', 'lxml',
+        'conippets==0.1.7',
     ],
     classifiers=[
         'Intended Audience :: Developers',
