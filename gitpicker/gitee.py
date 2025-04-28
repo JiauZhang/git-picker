@@ -1,11 +1,11 @@
 from .picker import Picker
+from lxml import etree
 
 class Gitee(Picker):
     def __init__(self, user, repo, branch, files, **kwargs):
         super().__init__(user, repo, branch, files, **kwargs)
         self.base_url = f'https://gitee.com/{self.user}/{self.repo}/raw/{self.branch}'
         self.web_url = f'https://gitee.com//{self.user}/{self.repo}/tree/{self.branch}'
-        from lxml import etree
         self.to_html = etree.HTML
 
     def get_file_lines(self, file):
