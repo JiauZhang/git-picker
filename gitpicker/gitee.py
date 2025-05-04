@@ -1,22 +1,23 @@
 from .picker import Picker
-from lxml import etree
+from lxml.etree import HTML as parse_html
 
 class Gitee(Picker):
-    def __init__(self, user, repo, branch, files, **kwargs):
-        super().__init__(user, repo, branch, files, **kwargs)
-        self.base_url = f'https://gitee.com/{self.user}/{self.repo}/raw/{self.branch}'
-        self.web_url = f'https://gitee.com//{self.user}/{self.repo}/tree/{self.branch}'
-        self.to_html = etree.HTML
+    def __init__(self, user, repo, branch, client_kwargs={}):
+        client_kwargs.update({
+            'base_url': f'https://gitee.com/{user}/{repo}',
+            'follow_redirects': True,
+        })
+        super().__init__(user, repo, branch, client_kwargs=client_kwargs)
 
     def get_file_lines(self, file):
-        url = f'{self.base_url}/{file}'
-        r = self.client.get(url, follow_redirects=True)
+        url = f'/raw/{self.branch}/{file}'
+        r = self.client.get(url)
         return [r.text]
 
     def get_dir_items(self, dir):
-        url = f'{self.web_url}/{dir}'
-        r = self.client.get(url, follow_redirects=True)
-        html = self.to_html(r.text.encode('utf-8'))
+        url = f'/tree/{self.branch}/{dir}'
+        r = self.client.get(url)
+        html = parse_html(r.text.encode('utf-8'))
         dir_tree = html.xpath('//div[@id="tree-slider"]')[0]
         _dirs = dir_tree.xpath('./div[@data-type="folder"]')
         for i in range(len(_dirs)):

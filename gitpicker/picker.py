@@ -1,29 +1,21 @@
 import os, time, httpx, traceback
 import os.path as osp
-import threading as td
-from queue import Queue
 from abc import ABC, abstractmethod
 
 class Picker(ABC):
-    def __init__(
-        self, user, repo, branch, files, retry=10, threads=os.cpu_count(),
-        proxy=None,
-    ):
+    def __init__(self, user, repo, branch, num_retry=10, time_interval=5, client_kwargs={},):
         self.user = user
         self.repo = repo
         self.branch = branch
-        self.files = files
-        self.retry = retry
-        self.tasks = Queue()
-        self.lock = td.Lock()
-        self.threads = threads
-        self.running = False
-        self.failed = False
+        self.num_retry = num_retry
+        self.time_interval = time_interval
         self.non_txt_suffixes = set([
             'png', 'jpg', 
         ])
-        self.client = httpx.Client(proxy=proxy)
+        self.client = httpx.Client(**client_kwargs)
+        self._files = []
 
+    def makedirs(self):
         os.makedirs(self.repo, exist_ok=True)
         if 'file' in self.files:
             dirnames = set()
@@ -53,44 +45,29 @@ class Picker(ABC):
         else:
             raise RuntimeError('only support str or list!')
 
-    def pick(self):
-        self.running = True
-        threads = [td.Thread(target=self.download_thread) for _ in range(self.threads)]
-        _ = [thread.start() for thread in threads]
+    def pick(self, files):
+        self.files = files
+        self.makedirs()
 
         if 'file' in self.files:
             files = self.check_arg(self.files['file'])
-            self.lock.acquire()
             for file in files:
-                self.tasks.put(file)
-            self.lock.release()
+                self._files.append(file)
         if 'dir' in self.files:
             dirs = self.check_arg(self.files['dir'])
             for dir in dirs:
-                self.download_dir(dir)
+                self.append_dir_files(dir)
+                time.sleep(self.time_interval)
 
-        self.running = False
-        _ = [thread.join() for thread in threads]
+        for file in self._files:
+            self.download_file(file)
+            time.sleep(self.time_interval)
 
     def save_file(self, filename, lines):
         with open(filename, 'w', encoding='utf-8') as f:
             for i in range(len(lines)-1):
                 f.write(lines[i] + '\n')
             f.write(lines[-1])
-
-    def download_thread(self):
-        while self.running or not self.tasks.empty():
-            if self.failed:
-                return
-            if not self.tasks.empty():
-                self.lock.acquire()
-                task = None
-                if not self.tasks.empty():
-                    task = self.tasks.get()
-                self.lock.release()
-                if task: self.download_file(task)
-            else:
-                time.sleep(1)
 
     @abstractmethod
     def get_file_lines(self, url):
@@ -107,45 +84,46 @@ class Picker(ABC):
             print(f'skip to download non text file: {self.repo}/{file}')
             return
         retry, lines = 0, None
-        while not self.failed and retry < self.retry:
+        einfo = ''
+        while retry < self.num_retry:
             try:
                 lines = self.get_file_lines(file)
                 break
-            except:
+            except Exception as e:
+                einfo = e
                 retry += 1
-                print(f'retry[{retry}/{self.retry}] {self.repo}/{file} failed!')
-                time.sleep(1)
+                print(f'retry[{retry}/{self.num_retry}] {self.repo}/{file} failed!')
+                time.sleep(self.time_interval)
 
-        if lines is None or retry == self.retry:
-            self.failed = True
-            raise RuntimeError(f'retry[{retry}/{self.retry}] downloading {self.repo}/{file} failed!')
+        if lines is None or retry == self.num_retry:
+            info = f'num_retry[{retry}/{self.num_retry}] downloading {self.repo}/{file} failed!\n{einfo}'
+            raise RuntimeError(info)
 
         filename = f'{self.repo}/{file}'
         self.save_file(filename, lines)
 
-    def download_dir(self, dir):
+    def append_dir_files(self, dir):
         print(f'downloading {self.repo}/{dir}')
         os.makedirs(f'{self.repo}/{dir}', exist_ok=True)
         retry, items = 0, None
-        while not self.failed and retry < self.retry:
+        einfo = ''
+        while retry < self.num_retry:
             try:
                 items = self.get_dir_items(dir)
                 break
-            except:
+            except Exception as e:
+                einfo = e
                 retry += 1
-                print(f'retry[{retry}/{self.retry}] {self.repo}/{dir} failed!')
-                traceback.print_exc()
-                time.sleep(1)
+                print(f'retry[{retry}/{self.num_retry}] {self.repo}/{dir} failed!')
+                time.sleep(self.time_interval)
 
-        if items is None or retry == self.retry:
-            self.failed = True
-            raise RuntimeError(f'retry[{retry}/{self.retry}] downloading {self.repo}/{dir} failed!')
+        if items is None or retry == self.num_retry:
+            info = f'num_retry[{retry}/{self.num_retry}] downloading {self.repo}/{dir} failed!\n{einfo}'
+            raise RuntimeError(info)
 
         _dirs, _files = items
 
-        self.lock.acquire()
         for file in _files:
-            self.tasks.put(file)
-        self.lock.release()
+            self._files.append(file)
         for dir in _dirs:
-            self.download_dir(dir)
+            self.append_dir_files(dir)

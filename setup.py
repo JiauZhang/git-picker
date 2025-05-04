@@ -17,7 +17,7 @@ setup(
     ],
     install_requires=[
         'httpx', 'lxml',
-        'conippets==0.1.7',
+        'conippets==0.1.8',
     ],
     classifiers=[
         'Intended Audience :: Developers',

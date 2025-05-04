@@ -5,7 +5,7 @@ pip install git-picker
 
 ### Usage
 ```python
-import gitpicker as gp
+import gitpicker.github as git
 
 user = 'JiauZhang'
 repo = 'git-picker'
@@ -21,8 +21,8 @@ files = {
     ],
 }
 
-picker = gp.GitHub(user, repo, branch, files)
-picker.pick()
+picker = git.GitHub(user, repo, branch)
+picker.pick(files)
 ```
 
 ### Sponsor

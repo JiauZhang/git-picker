@@ -1,4 +1,4 @@
-import gitpicker as gp
+import gitpicker.github as git
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -19,5 +19,5 @@ files = {
     ],
 }
 
-picker = gp.GitHub(user, repo, branch, files, proxy=args.proxy)
-picker.pick()
+picker = git.GitHub(user, repo, branch, client_kwargs={'proxy': args.proxy})
+picker.pick(files)
